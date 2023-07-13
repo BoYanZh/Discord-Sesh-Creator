@@ -1,0 +1,34 @@
+name: Create Event
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: '1 */1 * * *'
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+      - run: touch config.toml
+      - run: |
+          echo 'user_id = ${{ secrets.USER_ID }}' > config.toml
+          echo 'access_token = "${{ secrets.ACCESS_TOKEN }}"' >> config.toml
+          echo 'guild_id = ${{ secrets.GUILD_ID }}' >> config.toml
+          echo 'channel_id = ${{ secrets.CHANNEL_ID }}' >> config.toml
+          echo 'duration_hours = 2' >> config.toml
+          echo 'days_in_advance = 3' >> config.toml
+      - run: python3 run.py
+      - run: |
+          echo 'user_id = ${{ secrets.USER_ID }}' > config.toml
+          echo 'access_token = "${{ secrets.ACCESS_TOKEN }}"' >> config.toml
+          echo 'guild_id = ${{ secrets.GUILD_1_ID }}' >> config.toml
+          echo 'channel_id = ${{ secrets.CHANNEL_1_ID }}' >> config.toml
+          echo 'days_in_advance = 3' >> config.toml
+      - run: python3 run.py
