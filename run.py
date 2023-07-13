@@ -26,8 +26,8 @@ def main():
     guild_id = config["guild_id"]
     channel_id = config["channel_id"]
     access_token = config["access_token"]
-    duration_hours = config["duration_hours"]
-    days_in_advance = config["days_in_advance"]
+    duration_hours = config.get("duration_hours", 2)
+    days_in_advance = config.get("days_in_advance", 3)
     now = datetime.datetime.utcnow()
     transport = httpx.HTTPTransport(retries=5)
     with httpx.Client(transport=transport, timeout=30.0) as client:
