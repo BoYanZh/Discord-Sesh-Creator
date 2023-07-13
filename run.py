@@ -36,7 +36,7 @@ def main():
         headers["Referer"] = f"https://sesh.fyi/dashboard/{guild_id}/polls"
         headers["token_type"] = "Bearer"
         headers["access_token"] = access_token
-        created_events = []
+        created_polls = []
         page = 0
         while True:
             params = {
@@ -55,37 +55,39 @@ def main():
             }
             r = client.get(url, headers=headers, params=params)
             data = r.json()[0]["result"]["data"]
-            created_events.extend(data["items"])
-            if len(created_events) >= data["total_item_count"]:
+            created_polls.extend(data["items"])
+            if len(created_polls) >= data["total_item_count"]:
                 break
             page += 1
             time.sleep(1)
+        print("Created polls: ", created_polls)
         fmt_time = lambda t: t.isoformat(sep="T", timespec="milliseconds") + "Z"
         for days in range(days_in_advance):
-            start_event_time = now.replace(
+            start_time = now.replace(
                 hour=0, minute=0, second=0, microsecond=0
             ) + datetime.timedelta(days=days)
             options = [
                 {
                     "name": fmt_time(
-                        start_event_time + datetime.timedelta(hours=i * duration_hours)
+                        start_time + datetime.timedelta(hours=i * duration_hours)
                     ),
                     "is_newly_added": True,
                 }
                 for i in range(24 // duration_hours)
             ]
-            end_time = start_event_time + datetime.timedelta(days=1)
+            end_time = start_time + datetime.timedelta(days=1)
             poll_name = (
                 "Game Time Poll "
                 + hashlib.sha256(
                     (
-                        start_event_time.isoformat(sep=" ", timespec="seconds")
-                        + " UTC+0"
+                        start_time.isoformat(sep=" ", timespec="seconds") + " UTC+0"
                     ).encode()
                 ).hexdigest()[:7]
             )
-            if next(filter(lambda x: x["poll_name"] == poll_name, created_events), None):
-                return
+            if next(filter(lambda x: x["poll_name"] == poll_name, created_polls), None):
+                print(poll_name, "found, skipping")
+                continue
+            print(poll_name, "not found, creating")
             url = "https://sesh.fyi/api/create_poll"
             payload = {
                 "user_id": f"{user_id}",
@@ -94,6 +96,7 @@ def main():
                 "description": "",
                 "options": options,
                 "title": poll_name,
+                "end_time": fmt_time(end_time),
                 "allow_anyone_to_add": True,
                 "eligible_role_ids": [],
                 "image_url": "",
@@ -105,7 +108,6 @@ def main():
                 "forum_tag_ids": [],
                 "role_mention_ids": [],
                 "user_mentions_ids": [],
-                "end_time": fmt_time(end_time),
             }
             headers = HEADERS.copy()
             headers[
