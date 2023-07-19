@@ -93,7 +93,7 @@ def main():
                 "user_id": f"{user_id}",
                 "guild_id": f"{guild_id}",
                 "channel_id": f"{channel_id}",
-                "description": "",
+                "description": "The times in the options are shown in your local time zone.",
                 "options": options,
                 "title": poll_name,
                 "end_time": fmt_time(end_time),
