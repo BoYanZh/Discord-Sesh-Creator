@@ -62,8 +62,10 @@ def main():
                 break
             page += 1
             time.sleep(1)
-        print("Created polls: ", created_polls)
-        fmt_time = lambda t: t.isoformat(sep="T", timespec="milliseconds") + "Z"
+        print(
+            "Created polls: ", " ".join([poll["poll_name"] for poll in created_polls])
+        )
+        fmt_time = lambda t: t.strftime("%Y-%m-%dT%H:%M:%S.000Z")
         for days in range(days_in_advance):
             start_time = now.replace(
                 hour=0, minute=0, second=0, microsecond=0
@@ -84,6 +86,7 @@ def main():
                     (start_time.strftime("%Y:%m:%d %H:%M:%S %Z %z") + " UTC+0").encode()
                 ).hexdigest()[:7]
             )
+            print(fmt_time(end_time.astimezone(pytz.utc)))
             if next(filter(lambda x: x["poll_name"] == poll_name, created_polls), None):
                 print(poll_name, "found, skipping")
                 continue
@@ -96,7 +99,8 @@ def main():
                 "description": "The times in the options are shown in your local time zone.",
                 "options": options,
                 "title": poll_name,
-                "end_time": fmt_time(end_time),
+                "color": None,
+                "end_time": fmt_time(end_time.astimezone(pytz.utc)),
                 "allow_anyone_to_add": True,
                 "eligible_role_ids": [],
                 "image_url": "",
