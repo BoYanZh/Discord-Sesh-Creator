@@ -4,6 +4,7 @@ import json
 import time
 
 import httpx
+import pytz
 import toml
 
 HEADERS = {
@@ -28,7 +29,8 @@ def main():
     access_token = config["access_token"]
     duration_hours = config.get("duration_hours", 2)
     days_in_advance = config.get("days_in_advance", 3)
-    now = datetime.datetime.utcnow()
+    timezone = config.get("timezone", "utc")
+    now = datetime.datetime.now(pytz.timezone(timezone))
     transport = httpx.HTTPTransport(retries=5)
     with httpx.Client(transport=transport, timeout=30.0) as client:
         url = "https://sesh.fyi/trpc/poll.list"
@@ -79,9 +81,7 @@ def main():
             poll_name = (
                 "Game Time Poll "
                 + hashlib.sha256(
-                    (
-                        start_time.isoformat(sep=" ", timespec="seconds") + " UTC+0"
-                    ).encode()
+                    (start_time.strftime("%Y:%m:%d %H:%M:%S %Z %z") + " UTC+0").encode()
                 ).hexdigest()[:7]
             )
             if next(filter(lambda x: x["poll_name"] == poll_name, created_polls), None):

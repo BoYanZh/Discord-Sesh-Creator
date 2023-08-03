@@ -34,4 +34,5 @@ jobs:
           echo 'access_token = "${{ secrets.ACCESS_TOKEN }}"' >> config.toml
           echo 'guild_id = ${{ secrets.GUILD_2_ID }}' >> config.toml
           echo 'channel_id = ${{ secrets.CHANNEL_2_ID }}' >> config.toml
+          echo 'timezone = US/Eastern' >> config.toml
       - run: python3 run.py
