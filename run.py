@@ -73,7 +73,8 @@ def main():
             options = [
                 {
                     "name": fmt_time(
-                        start_time + datetime.timedelta(hours=i * duration_hours)
+                        start_time.astimezone(pytz.utc)
+                        + datetime.timedelta(hours=i * duration_hours)
                     ),
                     "is_newly_added": True,
                 }
@@ -86,7 +87,6 @@ def main():
                     (start_time.strftime("%Y:%m:%d %H:%M:%S %Z %z") + " UTC+0").encode()
                 ).hexdigest()[:7]
             )
-            print(fmt_time(end_time.astimezone(pytz.utc)))
             if next(filter(lambda x: x["poll_name"] == poll_name, created_polls), None):
                 print(poll_name, "found, skipping")
                 continue
